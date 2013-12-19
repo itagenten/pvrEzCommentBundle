@@ -1,0 +1,19 @@
+'An unexpected error has occurred, please contact the webmaster !': 'Ein unerwarteter Fehler ist aufgetreten, bitte benachrichtigen Sie den Betreiber der Webseite!'
+'Comment publish !': 'Kommentar veröffentlicht!'
+'Comment rejected !': 'Kommentar abgewiesen!'
+Comment(s): Kommentar(e)
+'Connection is not a valid %ezdbhandler%': 'Die Verbindung ist kein Objekt vom Typ %ezdbhandler%'
+'Could not be empty': 'Darf nicht leer sein'
+
+"Hello,\n\nA new comment is waiting your approbation:\n\nUser:\n    %name% - %email%\nComment:\n    %comment%\n\n\nApprove comment: %approve_url%\nReject comment: %reject_url%\n\nBest Regards,\nYour devoted server":
+    "\n": "Hallo,\n\nEin neuer Kommentar wartet auf Ihre Bestätigung:\n\nBenutzer:\n    %name% - %email%\nKommentar:\n    %comment%\n\n\nKommentar bestätigen: %approve_url%\nKommentar abweisen: %reject_url%\n\nMit freundlichen Grüßen,\nIhr Server.\n"
+
+'Something goes wrong !': 'Etwas ist schiefgegangen!'
+'This is not a valid email': 'Das ist keine gültige E-Mail-Adresse'
+'You must be connected to add a comment': 'Sie benötigen eine Verbindung, um einen Kommentar hinzuzufügen'
+'Your comment has been added correctly': 'Ihr Kommentar ist erfolgreich hinzugefügt worden'
+'Your comment should be moderate before publishing': 'Ihr Kommentar wird vor der Veröffentlichung geprüft'
+captcha: captcha
+email: email
+message: message
+name: name

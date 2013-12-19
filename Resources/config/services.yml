@@ -19,6 +19,7 @@ services:
             - %pvr_ezcomment.moderate_template%
             - %pvr_ezcomment.notify_enabled%
             - @service_container
+            - @ezpublish_legacy.kernel
 
     pvr_ezcomment.encryption:
         class: %pvr_ezcomment.encryption.class%
@@ -31,8 +32,8 @@ services:
         tags:
             - {name: ezpublish.limitationType, alias: ContentSection}
 
-    ezpublish.twig.pvrezcomment_extension:
-        class: %pvr_ezcomment.twig_extension.class%
-        arguments: [@pvr_ezcomment.manager, @ezpublish.connection]
-        tags:
-            - { name: twig.extension }
+    # ezpublish.twig.pvrezcomment_extension:
+    #     class: %pvr_ezcomment.twig_extension.class%
+    #     arguments: [@pvr_ezcomment.manager, @ezpublish.connection]
+    #     tags:
+    #         - { name: twig.extension }

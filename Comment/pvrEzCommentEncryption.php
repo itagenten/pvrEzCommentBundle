@@ -25,7 +25,7 @@ class pvrEzCommentEncryption implements pvrEzCommentEncryptionInterface
      */
     public function __construct( $secret )
     {
-        $this->secretKey = $secret;
+        $this->secretKey = mb_substr($secret, 0, 24);
     }
 
     /**

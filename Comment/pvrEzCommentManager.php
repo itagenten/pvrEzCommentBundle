@@ -22,6 +22,8 @@ use Symfony\Component\Validator\Constraints\NotBlank;
 use Symfony\Component\Validator\Constraints\Collection;
 use Symfony\Component\Form\Form;
 
+use eZContentLanguage;
+
 class pvrEzCommentManager implements pvrEzCommentManagerInterface
 {
     const COMMENT_WAITING   = 0;
@@ -39,9 +41,14 @@ class pvrEzCommentManager implements pvrEzCommentManagerInterface
     protected $container;
     protected $translator;
 
+    /**
+     * @var \eZ\Publish\Core\MVC\Legacy\Kernel
+     */
+    protected $legacyKernel;
+    
     public function __construct( $anonymous_access = false, $moderating = false,
                                  $moderate_subject, $moderate_from, $moderate_to, $moderate_template,
-                                 $isNotify, ContainerInterface $container )
+                                 $isNotify, ContainerInterface $container, \Closure $legacyKernelClosure )
     {
         $this->anonymous_access     = $anonymous_access;
         $this->moderating           = $moderating;
@@ -51,9 +58,16 @@ class pvrEzCommentManager implements pvrEzCommentManagerInterface
         $this->moderate_template    = $moderate_template;
         $this->isNotify             = $isNotify;
         $this->container            = $container;
+        $this->legacyKernel         = $legacyKernelClosure;
         $this->translator           = $this->container->get( 'translator' );
     }
 
+    protected function getLegacyKernel()
+    {
+        $kernelClosure = $this->legacyKernel;
+        return $kernelClosure();
+    }
+    
     /**
      * Check if connection is an instance of EzcDbHandler
      *
@@ -72,6 +86,26 @@ class pvrEzCommentManager implements pvrEzCommentManagerInterface
         }
     }
 
+    /**
+     *
+     * Wrapper for legacy function eZContentLanguage::idByLocale
+     *
+     * @param $locale
+     * @return int Locale Id
+     */
+    protected function idByLocale( $locale )
+    {
+        $localeId = $this->getLegacyKernel()->runCallback(
+            function () use ( $locale )
+            {
+                // Here you can reuse $settingName and $test variables inside the legacy context
+                return eZContentLanguage::idByLocale($locale);
+            }
+        );
+        
+        return $localeId;
+    }
+    
     /**
      * Get list of comments depending of contentId and status
      *
@@ -145,7 +179,8 @@ class pvrEzCommentManager implements pvrEzCommentManagerInterface
     {
         $this->checkConnection( $connection );
 
-        $languageId = $localeService->convertToEz( $request->getLocale() );
+        $language = $localeService->convertToEz( $request->getLocale() );
+        $languageId = $this->idByLocale( $language);
         $created    = $modified = \Time();
         $userId     = $currentUser->versionInfo->contentInfo->id;
         $sessionKey = $sessionId;
@@ -158,27 +193,33 @@ class pvrEzCommentManager implements pvrEzCommentManagerInterface
         $status     = $this->hasModeration() ? self::COMMENT_WAITING : self::COMMENT_ACCEPT;;
         $title      = "";
 
-        $selectQuery = $connection->createInsertQuery();
+        $insertQuery = $connection->createInsertQuery();
 
-        $selectQuery->insertInto( 'ezcomment' )
-            ->set( 'language_id',       $selectQuery->bindValue( $languageId ))
-            ->set( 'created',           $selectQuery->bindValue( $created ))
-            ->set( 'modified',          $selectQuery->bindValue( $modified ))
-            ->set( 'user_id',           $selectQuery->bindValue( $userId ))
-            ->set( 'session_key',       $selectQuery->bindValue( $sessionKey ))
-            ->set( 'ip',                $selectQuery->bindValue( $ip ))
-            ->set( 'contentobject_id',  $selectQuery->bindValue( $contentId ))
-            ->set( 'parent_comment_id', $selectQuery->bindValue( $parentCommentId ))
-            ->set( 'name',              $selectQuery->bindValue( $name ))
-            ->set( 'email',             $selectQuery->bindValue( $email ))
-            ->set( 'url',               $selectQuery->bindValue( $url ))
-            ->set( 'text',              $selectQuery->bindValue( $text ))
-            ->set( 'status',            $selectQuery->bindValue( $status ))
-            ->set( 'title',             $selectQuery->bindValue( $title ));
-        $statement = $selectQuery->prepare();
+        $insertQuery->insertInto( 'ezcomment' )
+            ->set( 'language_id',       $insertQuery->bindValue( $languageId ))
+            ->set( 'created',           $insertQuery->bindValue( $created ))
+            ->set( 'modified',          $insertQuery->bindValue( $modified ))
+            ->set( 'user_id',           $insertQuery->bindValue( $userId ))
+            ->set( 'session_key',       $insertQuery->bindValue( $sessionKey ))
+            ->set( 'ip',                $insertQuery->bindValue( $ip ))
+            ->set( 'contentobject_id',  $insertQuery->bindValue( $contentId ))
+            ->set( 'parent_comment_id', $insertQuery->bindValue( $parentCommentId ))
+            ->set( 'name',              $insertQuery->bindValue( $name ))
+            ->set( 'email',             $insertQuery->bindValue( $email ))
+            ->set( 'url',               $insertQuery->bindValue( $url ))
+            ->set( 'text',              $insertQuery->bindValue( $text ))
+            ->set( 'status',            $insertQuery->bindValue( $status ))
+            ->set( 'title',             $insertQuery->bindValue( $title ));
+        $statement = $insertQuery->prepare();
         $statement->execute();
 
-        return $connection->lastInsertId();
+        $selectQuery = $connection->createSelectQuery();
+        $selectQuery->select('LASTVAL()');
+        $statement = $selectQuery->prepare();
+        $statement->execute();
+        $result = $statement->fetch();
+        
+        return $result['lastval'];
     }
 
     /**
@@ -196,7 +237,8 @@ class pvrEzCommentManager implements pvrEzCommentManagerInterface
     {
         $this->checkConnection( $connection );
 
-        $languageId = $localeService->convertToEz( $request->getLocale() );
+        $language = $localeService->convertToEz( $request->getLocale() );
+        $languageId = $this->idByLocale( $language);
         $created    = $modified = \Time();
         $userId     = self::ANONYMOUS_USER;
         $sessionKey = $sessionId;
@@ -209,27 +251,33 @@ class pvrEzCommentManager implements pvrEzCommentManagerInterface
         $status     = $this->hasModeration() ? self::COMMENT_WAITING : self::COMMENT_ACCEPT;
         $title      = "";
 
-        $selectQuery = $connection->createInsertQuery();
+        $insertQuery = $connection->createInsertQuery();
 
-        $selectQuery->insertInto( 'ezcomment' )
-            ->set( 'language_id',       $selectQuery->bindValue( $languageId ))
-            ->set( 'created',           $selectQuery->bindValue( $created ))
-            ->set( 'modified',          $selectQuery->bindValue( $modified ))
-            ->set( 'user_id',           $selectQuery->bindValue( $userId ))
-            ->set( 'session_key',       $selectQuery->bindValue( $sessionKey ))
-            ->set( 'ip',                $selectQuery->bindValue( $ip ))
-            ->set( 'contentobject_id',  $selectQuery->bindValue( $contentId ))
-            ->set( 'parent_comment_id', $selectQuery->bindValue( $parentCommentId ))
-            ->set( 'name',              $selectQuery->bindValue( $name ))
-            ->set( 'email',             $selectQuery->bindValue( $email ))
-            ->set( 'url',               $selectQuery->bindValue( $url ))
-            ->set( 'text',              $selectQuery->bindValue( $text ))
-            ->set( 'status',            $selectQuery->bindValue( $status ))
-            ->set( 'title',             $selectQuery->bindValue( $title ));
+        $insertQuery->insertInto( 'ezcomment' )
+            ->set( 'language_id',       $insertQuery->bindValue( $languageId ))
+            ->set( 'created',           $insertQuery->bindValue( $created ))
+            ->set( 'modified',          $insertQuery->bindValue( $modified ))
+            ->set( 'user_id',           $insertQuery->bindValue( $userId ))
+            ->set( 'session_key',       $insertQuery->bindValue( $sessionKey ))
+            ->set( 'ip',                $insertQuery->bindValue( $ip ))
+            ->set( 'contentobject_id',  $insertQuery->bindValue( $contentId ))
+            ->set( 'parent_comment_id', $insertQuery->bindValue( $parentCommentId ))
+            ->set( 'name',              $insertQuery->bindValue( $name ))
+            ->set( 'email',             $insertQuery->bindValue( $email ))
+            ->set( 'url',               $insertQuery->bindValue( $url ))
+            ->set( 'text',              $insertQuery->bindValue( $text ))
+            ->set( 'status',            $insertQuery->bindValue( $status ))
+            ->set( 'title',             $insertQuery->bindValue( $title ));
+        $statement = $insertQuery->prepare();
+        $statement->execute();
+        
+        $selectQuery = $connection->createSelectQuery();
+        $selectQuery->select('LASTVAL()');
         $statement = $selectQuery->prepare();
         $statement->execute();
-
-        return $connection->lastInsertId();
+        $result = $statement->fetch();
+        
+        return $result['lastval'];
     }
 
 

@@ -26,7 +26,9 @@ interface pvrEzCommentManagerInterface
     public function __construct( $anonymous_access = false, $moderating = false,
                                  $moderate_subject, $moderate_from, $moderate_to, $moderate_template,
                                  $isNotify,
-                                 ContainerInterface $container );
+                                 ContainerInterface $container,
+                                 \Closure $legacyKernelClosure
+                             );
 
     /**
      * @param $connection Get connection to eZ Publish Database

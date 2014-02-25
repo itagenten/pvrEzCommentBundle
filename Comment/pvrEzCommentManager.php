@@ -40,7 +40,7 @@ class pvrEzCommentManager implements pvrEzCommentManagerInterface
     protected $isNotify;
     protected $container;
     protected $translator;
-
+    
     /**
      * @var \eZ\Publish\Core\MVC\Legacy\Kernel
      */
@@ -61,7 +61,7 @@ class pvrEzCommentManager implements pvrEzCommentManagerInterface
         $this->legacyKernel         = $legacyKernelClosure;
         $this->translator           = $this->container->get( 'translator' );
     }
-
+    
     protected function getLegacyKernel()
     {
         $kernelClosure = $this->legacyKernel;
@@ -85,7 +85,7 @@ class pvrEzCommentManager implements pvrEzCommentManagerInterface
             );
         }
     }
-
+    
     /**
      *
      * Wrapper for legacy function eZContentLanguage::idByLocale
@@ -290,24 +290,32 @@ class pvrEzCommentManager implements pvrEzCommentManagerInterface
     {
         $collectionConstraint = new Collection( array(
             $this->translator->trans( 'name' ) => new NotBlank(
-                array( "message" => $this->translator->trans( "Could not be empty" ) )
+                array("message" => $this->translator->trans( "Darf nicht leer sein" ) )
             ),
             $this->translator->trans( 'email' ) => new Email(
-                array( "message" => $this->translator->trans( "This is not a valid email" ) )
+                array("message" => $this->translator->trans( "Keine gültige E-Mail-Adresse" ) )
             ),
             $this->translator->trans( 'message' ) => new NotBlank(
-                array( "message" => $this->translator->trans( "Could not be empty" ) )
+                array( "message" => $this->translator->trans( "Darf nicht leer sein" ) )
             ),
         ));
 
-        $form = $this->container->get( 'form.factory' )->createBuilder( 'form', null, array(
-            'constraints' => $collectionConstraint
-        ))->add( $this->translator->trans( 'name' ), 'text')
-            ->add( $this->translator->trans( 'email' ), 'email')
-            ->add( $this->translator->trans( 'message' ), 'textarea' )
-            ->add( $this->translator->trans( 'captcha' ), 'captcha',
-                array( 'as_url' => true, 'reload' => true )
-            )
+        $form = $this->container->get( 'form.factory' )
+            ->createBuilder('form', null, array('constraints' => $collectionConstraint))
+            ->add( $this->translator->trans( 'name' ), 'text', array(
+                'label' => 'Name'
+            ))
+            ->add( $this->translator->trans( 'email' ), 'email', array(
+                'label' => 'E-Mail-Adresse'
+            ))
+            ->add( $this->translator->trans( 'message' ), 'textarea', array(
+                'label' => 'Kommentar'
+            ))
+            ->add( $this->translator->trans( 'captcha' ), 'captcha', array(
+                'label' => 'Bitte gib die Zeichen aus der Grafik in das Feld ein',
+                'as_url' => true,
+                'reload' => true
+            ))
             ->getForm();
 
         return $form;
@@ -322,13 +330,15 @@ class pvrEzCommentManager implements pvrEzCommentManagerInterface
     {
         $collectionConstraint = new Collection( array(
             $this->translator->trans( 'message' ) => new NotBlank(
-                array( "message" => $this->translator->trans( "Could not be empty" ) )
+                array( "message" => $this->translator->trans( "Darf nicht leer sein" ) )
             ),
         ));
 
         $form = $this->container->get( 'form.factory' )->createBuilder( 'form', null, array(
             'constraints' => $collectionConstraint
-        ))->add( $this->translator->trans( 'message' ), 'textarea' )
+        ))->add( $this->translator->trans( 'message' ), 'textarea', array(
+            'label' => 'Kommentar'
+        ))
             ->getForm();
 
         return $form;

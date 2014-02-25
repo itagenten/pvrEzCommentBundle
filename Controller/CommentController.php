@@ -165,14 +165,14 @@ class CommentController extends Controller
                         $commentId
                     );
                     $response = new Response(
-                        $this->container->get( 'translator' )->trans( 'Your comment should be moderate before publishing' )
+                        $this->container->get( 'translator' )->trans( 'Dein Kommentar wird vor der Veröffentlichung geprüft' )
                     );
                     return $response;
                 }
                 else
                 {
                     $response = new Response(
-                        $this->container->get( 'translator' )->trans( 'Your comment has been added correctly' )
+                        $this->container->get( 'translator' )->trans( 'Dein Kommentar ist hinzugefügt worden' )
                     );
                     return $response;
                 }
@@ -187,7 +187,7 @@ class CommentController extends Controller
             }
         }
         return new Response(
-            $this->container->get( 'translator' )->trans( 'Something goes wrong !' ), 400
+            $this->container->get( 'translator' )->trans( 'Irgendwas läuft schief!' ), 400
         );
     }
 
@@ -215,7 +215,7 @@ class CommentController extends Controller
                 if ( $pvrEzCommentManager->updateStatus( $connection, $commentId ) )
                 {
                     return new Response(
-                        $this->container->get( 'translator' )->trans( "Comment publish !" )
+                        $this->container->get( 'translator' )->trans( "Kommentar veröffentlicht!" )
                     );
                 }
             }
@@ -225,7 +225,7 @@ class CommentController extends Controller
                 if ( $pvrEzCommentManager->updateStatus( $connection, $commentId, $pvrEzCommentManager::COMMENT_REJECTED ) )
                 {
                     return new Response(
-                        $this->container->get( 'translator' )->trans( "Comment rejected !" )
+                        $this->container->get( 'translator' )->trans( "Kommentar zurückgewiesen!" )
                     );
                 }
             }
@@ -233,7 +233,7 @@ class CommentController extends Controller
         }
         return new Response(
             $this->container->get( 'translator' )
-                ->trans( "An unexpected error has occurred, please contact the webmaster !" ),
+                ->trans( "Ein unerwarteter Fehler ist aufgetreten, bitte verständigen Sie den Betreiber der Webseite!" ),
             406
         );
     }

@@ -13,15 +13,6 @@
     </div>
 </form>
 
-{#
-{% javascripts "@pvrEzCommentBundle/Resources/public/js/pvrEzCommentBundle.js" %}
-    <script type="text/javascript">
-        window.url = "{{ path( 'pvrezcomment_add', { 'contentId': contentId }) }}";
-    </script>
-    <script type="text/javascript" src="{{ asset_url }}"></script>
-{% endjavascripts %}
-#}
-
 {% else %}
    <strong>{% trans %}You must be connected to add a comment{% endtrans %}</strong>
 {% endif %}

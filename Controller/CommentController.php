@@ -61,16 +61,19 @@ class CommentController extends Controller
         // Case: configuration set to anonymous
         if ( $pvrEzCommentManager->hasAnonymousAccess() )
         {
-            // if user is connected
-            if ( $this->get( 'security.context' )->getToken()->isAuthenticated() )
-            {
-                $form = $pvrEzCommentManager->createUserForm();
-            }
-            else
-            {
-                // else
-                $form = $pvrEzCommentManager->createAnonymousForm();
-            }
+            // // if user is connected
+            // if ( $this->get( 'security.context' )->getToken()->isAuthenticated() )
+            // {
+            //     $form = $pvrEzCommentManager->createUserForm();
+            // }
+            // else
+            // {
+            //     // else
+            //     $form = $pvrEzCommentManager->createAnonymousForm();
+            // }
+
+            $form = $pvrEzCommentManager->createAnonymousForm();
+
         }
         // Case: Configuration set to connected user
         else
